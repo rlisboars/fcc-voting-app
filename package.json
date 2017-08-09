@@ -1,0 +1,25 @@
+{
+  "name": "fcc-voting-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server/server.js",
+    "client": "node start-client.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rlisboars/fcc-voting-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rlisboars/fcc-voting-app/issues"
+  },
+  "homepage": "https://github.com/rlisboars/fcc-voting-app#readme",
+  "devDependencies": {
+    "concurrently": "^3.5.0"
+  }
+}
