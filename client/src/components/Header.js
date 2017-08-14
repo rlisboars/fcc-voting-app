@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import axios from 'axios';
 
-import { loginUser, logoutUser } from '../actions';
+import { loginUser, logoutUser, setPoolsFilter } from '../actions';
 
 const ROOT_URL = process.env.REACT_APP_API_URL;
 
@@ -21,6 +21,7 @@ class Header extends Component {
         }
     }
     logout() {
+        this.props.setPoolsFilter('recent', 1);
         localStorage.removeItem('vote-app-user');
         this.props.logoutUser();
     }
@@ -71,4 +72,4 @@ function mapStateToProps(state) {
     };
 };
 
-export default connect(mapStateToProps, { loginUser, logoutUser })(Header);
+export default connect(mapStateToProps, { loginUser, logoutUser, setPoolsFilter })(Header);

@@ -7,6 +7,7 @@ import { fetchPools, setPoolsFilter } from '../actions';
 
 class PoolList extends Component {
     poolsPerPage = 8;
+    total = 0;
     
     constructor(props) {
         super(props);
@@ -27,7 +28,7 @@ class PoolList extends Component {
         this.props.history.push('/pool/'+poolId);
     }
     setPage(page) {
-        if (page >= 1 && page <= Math.ceil(this.props.total / this.poolsPerPage)) {
+        if (page >= 1 && page <= Math.ceil(this.total / this.poolsPerPage)) {
             this.setState({
                 page
             });
@@ -49,7 +50,7 @@ class PoolList extends Component {
                 </Table.Row>
             );
         }
-        const sortedPools = _.toArray(this.props.pools).sort((p1, p2) => { 
+        let sortedPools = _.toArray(this.props.pools).sort((p1, p2) => { 
             return new Date(p2.createdAt) - new Date(p1.createdAt);
         });
         switch(this.state.filter) {
@@ -62,8 +63,21 @@ class PoolList extends Component {
                     return res;
                 });
                 break;
+            case "mine":
+                if (this.props.user) {
+                    sortedPools = sortedPools.filter(pool => this.props.user.id === pool.user._id);
+                }
+                break;
             default:
                 break;
+        }
+        this.total = sortedPools.length;
+         if (this.total === 0) {
+            return(
+                <Table.Row>
+                    <Table.Cell colSpan='4' textAlign='center'>No Pools found!</Table.Cell>
+                </Table.Row>
+            );
         }
         const groupSize = this.poolsPerPage;
         var paginatedPools = _.map(sortedPools, function(pool, index) {
@@ -82,7 +96,7 @@ class PoolList extends Component {
         });
     }
     renderPagination() {
-        const pages = Math.ceil(this.props.total / this.poolsPerPage);
+        const pages = Math.ceil(this.total / this.poolsPerPage);
         return Array.from({ length: pages }, (_, i) => {
             return(
                 <Menu.Item as='a' active={this.state.page === i+1} key={i+1} onClick={this.setPage.bind(this, i+1)}>{i+1}</Menu.Item>
@@ -124,11 +138,11 @@ class PoolList extends Component {
                         <Table.Row>
                             <Table.HeaderCell colSpan='4'>
                                 <Menu floated='right' pagination>
-                                     <Menu.Item as='a' icon>
+                                     <Menu.Item as='a' onClick={this.setPage.bind(this, this.state.page-1)} icon>
                                         <Icon name='left chevron' />
                                     </Menu.Item>
                                     {this.renderPagination()}
-                                    <Menu.Item as='a' icon>
+                                    <Menu.Item as='a' onClick={this.setPage.bind(this, this.state.page+1)} icon>
                                         <Icon name='right chevron' />
                                     </Menu.Item>
                                 </Menu>
@@ -136,35 +150,6 @@ class PoolList extends Component {
                         </Table.Row>
                     </Table.Footer>
                 </Table>
-
-                {/* <table className="ui selectable celled table">
-                    <thead>
-                        <tr>
-                            <th className="seven wide">Pool</th>
-                            <th className="one wide center aligned">Votes</th>
-                            <th className="two wide center aligned">Posted by</th>
-                            <th className="two wide center aligned">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.renderPools()}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colSpan="4">
-                                <div className="ui right floated pagination menu">
-                                    <a className="icon item" onClick={this.setPage.bind(this, this.state.page-1)}>
-                                        <i className="left chevron icon"></i>
-                                    </a>
-                                    {this.renderPagination()}
-                                    <a className="icon item" onClick={this.setPage.bind(this, this.state.page+1)}>
-                                        <i className="right chevron icon"></i>
-                                    </a>
-                                </div>
-                            </th>
-                        </tr>
-                    </tfoot>
-                </table> */}
             </div>
         );
     }
