@@ -7,6 +7,7 @@ export const POOLS_FILTER = 'pools_filter';
 export const VOTE = 'vote';
 export const USER_LOGIN = 'user_login';
 export const USER_LOGOUT = 'user_logout';
+export const USER_SIGNUP = 'user_signup';
 
 
 const ROOT_URL = process.env.REACT_APP_API_URL;
@@ -65,6 +66,17 @@ export function loginUser(email, pass, user) {
 export function logoutUser() {
     return {
         type: USER_LOGOUT
+    }
+}
+
+export function userSignUp(email, pass) {
+    const request = axios.post(`${ROOT_URL}signup`, {
+        email,
+        password: pass
+    });
+    return {
+        type: USER_SIGNUP,
+        payload: request
     }
 }
 

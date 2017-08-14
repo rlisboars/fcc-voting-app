@@ -1,26 +1,92 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { LocalForm, Control } from 'react-redux-form';
+import { Segment, Button } from 'semantic-ui-react';
+import { Redirect } from 'react-router';
+
+import { userSignUp } from '../actions';
 
 class Signup extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            error: undefined
+        }
+    }
+     handleSubmit(values) {
+        this.setState({
+            error: undefined
+        });
+        const reg = /^[\w.]+@\w+.\w+.{0,1}\w*$/;
+        if (!values.email || !values.pass) {
+            this.setState({
+                error: ["Please fill all fields"]
+            });
+        } else {
+            if (!reg.test(values.email)) {
+                this.setState({
+                    error: ["Invalid email address"]
+                });
+            } else {
+                this.props.userSignUp(values.email, values.pass);
+            }
+        }
+    }
+
+    getErrors() {
+        if (this.props.error) {
+            return(
+                <div>
+                    <i className="warning circle icon"></i>
+                    {this.props.error}
+                </div>
+            );
+        }
+    }
     render() {
+        if (this.props.user) {
+            localStorage.setItem('vote-app-user', JSON.stringify(this.props.user));
+            return(<Redirect to='/'/>);
+        }
+
         return(
-            <div className="ui raised segment">
-                <form className="ui form">
+            <Segment raised>
+                <LocalForm 
+                    className="ui form"
+                    onSubmit={(values) => this.handleSubmit(values)}>
                     <div className="field">
                         <label>Email</label>
-                        <input type="text" className="form-control" id="emailInput" placeholder="Your email" />
+                        <Control.text model=".email" className="form-control" id="emailInput" placeholder="Your email" />
                     </div>
                     <div className="field">
                         <label>Password</label>
-                        <input type="password" className="form-control" id="passwordInput" placeholder="Your password" />
+                        <Control.text type="password" model=".pass" className="form-control" id="passwordInput" placeholder="Your password" />
                     </div>
-                    <div className="ui inverted red segment">
-                        <i className="warning circle icon"></i>
-                        Wrong password</div>
-                    <input type="submit" className="ui button" value="Submit" />
-                </form>
-            </div>
+                    { (this.state.error || this.props.error) &&
+                        <div className="ui inverted red segment">
+                        { this.state.error && this.state.error.map((err, idx) => {
+                            return(
+                            <div key={idx}>
+                            <i className="warning circle icon"></i>
+                                {err}
+                            </div>);
+                        })}
+                        {this.getErrors()}
+                        </div>
+                    }
+                    <Button type="submit" value="Submit">Sign Up</Button>
+                </LocalForm>
+            </Segment>
         );
     }
 }
 
-export default Signup;
+
+function mapStateToProps(state) {
+    return {
+        user : state.user.user,
+        error: state.user.error ? JSON.parse(state.user.error).error : undefined
+    };
+};
+
+export default connect(mapStateToProps, { userSignUp })(Signup);
