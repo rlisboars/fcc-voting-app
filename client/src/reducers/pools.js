@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { FETCH_POOLS, FETCH_POOL, POOLS_FILTER } from '../actions';
+import { FETCH_POOLS, FETCH_POOL, POOLS_FILTER, VOTE } from '../actions';
 
 export function poolsReducer(state = {}, action) {
     switch(action.type) {
@@ -9,9 +9,11 @@ export function poolsReducer(state = {}, action) {
             // return { total: action.payload.data.total, pools: action.payload.data.pools };
         case FETCH_POOL:
             if (action.error) {
-                return { error: "Teste" } 
+                return { error: "Invalid Pool" } 
             }
             return { ...state, [action.payload.data._id]: action.payload.data };
+        case VOTE:
+            return { ...state, [action.payload.data._id]: action.payload.data};
         default:
             return state;
     }

@@ -4,6 +4,7 @@ export const FETCH_POOLS = 'fetch_pools';
 export const FETCH_POOL = 'fetch_pool';
 export const CREATE_POOL = 'crate_pool';
 export const POOLS_FILTER = 'pools_filter';
+export const VOTE = 'vote';
 export const USER_LOGIN = 'user_login';
 export const USER_LOGOUT = 'user_logout';
 
@@ -31,7 +32,15 @@ export function createPool(pool, token, callback) {
     return {
         type: CREATE_POOL,
         payload: request
-    }
+    };
+}
+
+export function vote(poolId, optionId, callback) {
+    const request = axios.get(`${ROOT_URL}vote?pool=${poolId}&option=${optionId}`);
+    return {
+        type: VOTE,
+        payload: request
+    };
 }
 
 export function loginUser(email, pass, user) {

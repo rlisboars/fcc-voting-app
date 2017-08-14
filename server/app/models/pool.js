@@ -80,7 +80,7 @@ poolSchema.statics.vote = function(poolId, optionId, callback) {
                 if (err) {
                     return callback(false, { error: err });
                 } else {
-                    return callback(true, pool.votes);
+                    return callback(true, pool);
                 }
             });
         }
