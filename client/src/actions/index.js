@@ -3,6 +3,7 @@ import axios from 'axios';
 export const FETCH_POOLS = 'fetch_pools';
 export const FETCH_POOL = 'fetch_pool';
 export const CREATE_POOL = 'crate_pool';
+export const DELETE_POOL = 'delete_pool';
 export const POOLS_FILTER = 'pools_filter';
 export const VOTE = 'vote';
 export const USER_LOGIN = 'user_login';
@@ -34,6 +35,14 @@ export function createPool(pool, token, callback) {
         type: CREATE_POOL,
         payload: request
     };
+}
+
+export function deletePool(poolId, token, callback) {
+    axios.delete(`${ROOT_URL}pool/${poolId}`, { headers: { Authorization : `JWT ${token}` } }).then((res) => callback(res));
+    return {
+        type: DELETE_POOL,
+        payload: poolId
+    }
 }
 
 export function vote(poolId, optionId, callback) {

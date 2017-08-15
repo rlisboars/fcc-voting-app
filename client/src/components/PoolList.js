@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Menu, Input, Table, Icon } from 'semantic-ui-react';
+import { Menu, Input, Table, Icon, Button, Label } from 'semantic-ui-react';
 
-import { fetchPools, setPoolsFilter } from '../actions';
+import { fetchPools, setPoolsFilter, deletePool } from '../actions';
 
 class PoolList extends Component {
     poolsPerPage = 8;
@@ -13,7 +13,8 @@ class PoolList extends Component {
         super(props);
         this.state = {
             filter: "",
-            page: 0
+            page: 0,
+            message: undefined
         }
     }
 
@@ -41,6 +42,21 @@ class PoolList extends Component {
             page: 1
         });
         this.props.setPoolsFilter(name, 1);
+    }
+    deletePool(pool) {
+        const user = localStorage.getItem('vote-app-user') ? JSON.parse(localStorage.getItem('vote-app-user')) : null;
+        this.props.deletePool(pool._id, user.token, res => {
+            if (res.status === 200) {
+                this.setState({
+                    message: res.data + ' deleted!'
+                });
+                setTimeout(() => {
+                    this.setState({
+                        message: undefined
+                    })
+                }, 4000);
+            }
+        });
     }
     renderPools() {
         if (this.props.total === 0) {
@@ -75,7 +91,7 @@ class PoolList extends Component {
          if (this.total === 0) {
             return(
                 <Table.Row>
-                    <Table.Cell colSpan='4' textAlign='center'>No Pools found!</Table.Cell>
+                    <Table.Cell colSpan='5' textAlign='center'>No Pools found!</Table.Cell>
                 </Table.Row>
             );
         }
@@ -86,11 +102,16 @@ class PoolList extends Component {
 
         return paginatedPools[this.state.page-1].map(pool => {
             return(
-                <Table.Row key={pool._id} onClick={this.handleClick.bind(this, pool._id)}>
-                    <Table.Cell>{pool.pool}</Table.Cell>
-                    <Table.Cell textAlign='center'>{pool.votes}</Table.Cell>
-                    <Table.Cell textAlign='center'>{pool.user.name.split("@")[0]}</Table.Cell>
-                    <Table.Cell textAlign='center'>{new Date(pool.createdAt).toLocaleString()}</Table.Cell>
+                <Table.Row key={pool._id}>
+                    <Table.Cell onClick={this.handleClick.bind(this, pool._id)}>{pool.pool}</Table.Cell>
+                    <Table.Cell textAlign='center' onClick={this.handleClick.bind(this, pool._id)}>{pool.votes}</Table.Cell>
+                    <Table.Cell textAlign='center' onClick={this.handleClick.bind(this, pool._id)}>{pool.user.name.split("@")[0]}</Table.Cell>
+                    <Table.Cell textAlign='center' onClick={this.handleClick.bind(this, pool._id)}>{new Date(pool.createdAt).toLocaleString()}</Table.Cell>
+                    { this.state.filter === 'mine' &&
+                        <Table.Cell textAlign='center'>
+                            <Button icon='trash outline' color='red' onClick={this.deletePool.bind(this, pool)} size='mini'/>
+                        </Table.Cell>
+                    }
                 </Table.Row>
             );
         });
@@ -116,6 +137,11 @@ class PoolList extends Component {
                     { this.props.user &&
                         <Menu.Item name='mine' active={this.props.filters.filter === 'mine'} onClick={this.setFilter.bind(this)}>Mine</Menu.Item>
                     }
+                    { this.state.message &&
+                        <Menu.Item>
+                            <Label color='green'>{this.state.message}</Label>
+                        </Menu.Item>
+                    }
                     <Menu.Menu position='right'>
                         <Menu.Item>
                             <Input transparent icon={{ name: 'search', link: true }} placeholder='Search pools...' />
@@ -125,10 +151,13 @@ class PoolList extends Component {
                 <Table celled selectable>
                     <Table.Header>
                         <Table.Row>
-                            <Table.HeaderCell width={7}>Pool</Table.HeaderCell>
+                            <Table.HeaderCell width={this.state.filter === 'mine' ? 6 : 7}>Pool</Table.HeaderCell>
                             <Table.HeaderCell width={1} textAlign='center'>Votes</Table.HeaderCell>
                             <Table.HeaderCell width={2} textAlign='center'>Posted by</Table.HeaderCell>
                             <Table.HeaderCell width={2} textAlign='center'>Date</Table.HeaderCell>
+                            { this.state.filter === 'mine' &&
+                                <Table.HeaderCell width={1} textAlign='center'>Delete</Table.HeaderCell>
+                            }
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
@@ -136,7 +165,7 @@ class PoolList extends Component {
                     </Table.Body>
                     <Table.Footer fullWidth>
                         <Table.Row>
-                            <Table.HeaderCell colSpan='4'>
+                            <Table.HeaderCell colSpan='5'>
                                 <Menu floated='right' pagination>
                                      <Menu.Item as='a' onClick={this.setPage.bind(this, this.state.page-1)} icon>
                                         <Icon name='left chevron' />
@@ -164,4 +193,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps, { fetchPools, setPoolsFilter })(PoolList);
+export default connect(mapStateToProps, { fetchPools, setPoolsFilter, deletePool })(PoolList);
