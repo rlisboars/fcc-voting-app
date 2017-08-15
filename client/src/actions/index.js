@@ -4,6 +4,7 @@ export const FETCH_POOLS = 'fetch_pools';
 export const FETCH_POOL = 'fetch_pool';
 export const CREATE_POOL = 'crate_pool';
 export const DELETE_POOL = 'delete_pool';
+export const ADD_OPTION = 'add_option';
 export const POOLS_FILTER = 'pools_filter';
 export const VOTE = 'vote';
 export const USER_LOGIN = 'user_login';
@@ -42,6 +43,14 @@ export function deletePool(poolId, token, callback) {
     return {
         type: DELETE_POOL,
         payload: poolId
+    }
+}
+
+export function addOption(poolId, option, callback) {
+    const request = axios.post(`${ROOT_URL}pool/${poolId}/add`, { option }).then(res => callback(res));
+    return {
+        type: ADD_OPTION,
+        payload: request
     }
 }
 

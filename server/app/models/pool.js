@@ -102,7 +102,7 @@ poolSchema.statics.addOption = function(poolId, option, userId, callback) {
                 if (err) {
                     return callback(false, { error: err });
                 } else {
-                    return callback(true, opt._id);
+                    return callback(true, pool);
                 }
             })
         }

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Segment, Grid, Container, Form } from 'semantic-ui-react';
 import { PieChart, Pie, Tooltip, Cell, Legend } from 'recharts';
 
-import { fetchPool, vote } from '../actions';
+import { fetchPool, vote, addOption } from '../actions';
 
 const chartColors = ["#3366CC","#DC3912","#FF9900","#109618","#990099","#3B3EAC","#0099C6","#DD4477","#66AA00",
 "#B82E2E","#316395","#994499","#22AA99","#AAAA11","#6633CC","#E67300","#8B0707",
@@ -13,7 +13,8 @@ class PoolVote extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            option: ""
+            option: undefined,
+            addOption: false
         };
     }
     componentWillMount() {
@@ -37,10 +38,35 @@ class PoolVote extends Component {
         })
     }
     handleSubmit() {
-        this.props.vote(this.props.pool._id, this.state.option, res => {
-            if (res.status === 200) {
-                this.props.fetchPool(this.props.pool._id);
+        if (this.state.option) {
+            if (!this.state.addOption) {
+                this.props.vote(this.props.pool._id, this.state.option, res => {
+                    if (res.status === 200) {
+                        this.props.fetchPool(this.props.pool._id);
+                    }
+                });
+            } else {
+                this.props.addOption(this.props.pool._id, this.state.option, res => {
+                    if (res.status === 200) {
+                        this.props.fetchPool(this.props.pool._id);
+                        this.setState({
+                            option: undefined,
+                            addOption: false
+                        })
+                    }
+                });
             }
+        }
+    }
+    handleOptionButton() {
+        this.setState({
+            option: undefined,
+            addOption: !this.state.addOption
+        })
+    }
+    handleOptionChange(event) {
+        this.setState({
+            option: event.target.value
         });
     }
     renderTooltip({payload}) {
@@ -74,19 +100,30 @@ class PoolVote extends Component {
                         <Grid.Column width={8}>
                             <h3>{this.props.pool.pool}</h3>
                             <Form>
-                                <Form.Select options={
-                                    this.props.pool.options.map(opt => {
-                                        return({
-                                            key: opt._id,
-                                            text: opt.option,
-                                            value: opt._id
-                                        });
-                                    })
-                                } 
-                                placeholder='Choose an option'
-                                onChange={this.handleChange.bind(this)}
-                                />
-                                <Form.Button type='submit' onClick={this.handleSubmit.bind(this)}>Submit</Form.Button>
+                                {
+                                    !this.state.addOption &&
+                                    <Form.Select options={
+                                        this.props.pool.options.map(opt => {
+                                            return({
+                                                key: opt._id,
+                                                text: opt.option,
+                                                value: opt._id
+                                            });
+                                        })
+                                    } 
+                                    placeholder='Choose an option'
+                                    onChange={this.handleChange.bind(this)}
+                                    />
+                                }
+                                {
+                                    this.state.addOption && 
+                                    <Form.Input type='text' placeholder='Type your new option' onChange={this.handleOptionChange.bind(this)} /> 
+                                }
+                                
+                                <Form.Group>
+                                    <Form.Button type='submit' onClick={this.handleSubmit.bind(this)} primary>Submit</Form.Button>
+                                    <Form.Button type='button' secondary onClick={this.handleOptionButton.bind(this)}>{ !this.state.addOption ? 'Add option' : 'Cancel' }</Form.Button>
+                                </Form.Group>
                             </Form>
                         </Grid.Column>
                         <Grid.Column width={8}>
@@ -126,4 +163,4 @@ function mapStateToProps(state, ownProps) {
     }
 }
 
-export default connect(mapStateToProps, { fetchPool, vote })(PoolVote);
+export default connect(mapStateToProps, { fetchPool, vote, addOption })(PoolVote);
