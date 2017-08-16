@@ -1,6 +1,7 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Segment, Grid, Container, Form } from 'semantic-ui-react';
+import { Segment, Grid, Container, Form, Message, Icon } from 'semantic-ui-react';
 import { PieChart, Pie, Tooltip, Cell, Legend } from 'recharts';
 
 import { fetchPool, vote, addOption } from '../actions';
@@ -14,7 +15,9 @@ class PoolVote extends Component {
         super(props);
         this.state = {
             option: undefined,
-            addOption: false
+            addOption: false,
+            error: undefined,
+            success: undefined
         };
     }
     componentWillMount() {
@@ -34,7 +37,8 @@ class PoolVote extends Component {
     }
     handleChange(evt, option) {
         this.setState({
-            option: option.value
+            option: option.value,
+            success: undefined
         })
     }
     handleSubmit() {
@@ -46,27 +50,38 @@ class PoolVote extends Component {
                     }
                 });
             } else {
-                this.props.addOption(this.props.pool._id, this.state.option, res => {
-                    if (res.status === 200) {
-                        this.props.fetchPool(this.props.pool._id);
-                        this.setState({
-                            option: undefined,
-                            addOption: false
-                        })
-                    }
-                });
+                const options = _.map(this.props.pool.options, 'option');
+                const option = this.state.option.trim();
+                if (_.indexOf(options, option) < 0) {
+                    this.props.addOption(this.props.pool._id, option, res => {
+                        if (res.status === 200) {
+                            this.props.fetchPool(this.props.pool._id);
+                            this.setState({
+                                option: undefined,
+                                addOption: false,
+                                success: 'Option added!'
+                            })
+                        }
+                    });
+                } else {
+                    this.setState({
+                        error: 'Option already available in this pool'
+                    });
+                }
             }
         }
     }
     handleOptionButton() {
         this.setState({
             option: undefined,
-            addOption: !this.state.addOption
+            addOption: !this.state.addOption,
+            error: undefined
         })
     }
     handleOptionChange(event) {
         this.setState({
-            option: event.target.value
+            option: event.target.value,
+            error: undefined
         });
     }
     renderTooltip({payload}) {
@@ -125,6 +140,18 @@ class PoolVote extends Component {
                                     <Form.Button type='button' secondary onClick={this.handleOptionButton.bind(this)}>{ !this.state.addOption ? 'Add option' : 'Cancel' }</Form.Button>
                                 </Form.Group>
                             </Form>
+                            {
+                                this.state.error &&
+                                <Message color='red'>
+                                    <Icon name='warning circle' />{this.state.error}
+                                </Message>
+                            }
+                            {
+                                this.state.success &&
+                                <Message color='green'>
+                                    <Icon name='info circle' />{this.state.success}
+                                </Message>
+                            }
                         </Grid.Column>
                         <Grid.Column width={8}>
                                 <PieChart width={400} height={400}>

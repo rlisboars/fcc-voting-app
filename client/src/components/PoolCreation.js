@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Link } from 'react-router-dom';
@@ -32,11 +33,13 @@ class PoolCreation extends Component {
         });
     }
     insertOption() {
+        const options = _.map(this.state.options, 'option');
+        const option = this.state.option.trim();
         if (this.state.option.length === 0) {
             this.setState({
                 error: "Invalid option text"
             });
-        } else if(this.state.options.includes(this.state.option.trim())) {
+        } else if (_.indexOf(options, option) >= 0) {
             this.setState({
                 error: "Option already exists"
             });
