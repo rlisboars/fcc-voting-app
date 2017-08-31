@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Menu, Input, Table, Icon, Button, Label } from 'semantic-ui-react';
+import { Menu, Table, Icon, Button, Label } from 'semantic-ui-react';
 
 import { fetchPools, setPoolsFilter, deletePool } from '../actions';
 
@@ -142,11 +142,11 @@ class PoolList extends Component {
                             <Label color='green'>{this.state.message}</Label>
                         </Menu.Item>
                     }
-                    <Menu.Menu position='right'>
+                    {/* <Menu.Menu position='right'>
                         <Menu.Item>
                             <Input transparent icon={{ name: 'search', link: true }} placeholder='Search pools...' />
                         </Menu.Item>
-                    </Menu.Menu>
+                    </Menu.Menu> */}
                 </Menu>
                 <Table celled selectable>
                     <Table.Header>

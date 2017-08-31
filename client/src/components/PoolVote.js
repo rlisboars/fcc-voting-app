@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Segment, Grid, Container, Form, Message, Icon } from 'semantic-ui-react';
-import { PieChart, Pie, Tooltip, Cell, Legend } from 'recharts';
+import { PieChart, Pie, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
 
 import { fetchPool, vote, addOption } from '../actions';
 
@@ -17,12 +17,22 @@ class PoolVote extends Component {
             option: undefined,
             addOption: false,
             error: undefined,
-            success: undefined
+            success: undefined,
+            sameUser: false
         };
     }
     componentWillMount() {
         const { id } = this.props.match.params;
         this.props.fetchPool(id);
+    }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.pool && nextProps.user.user) {    
+            if (nextProps.pool.user._id === nextProps.user.user.id) {
+                this.setState({ sameUser: true });
+            } else {
+                this.setState({ sameUser: false });
+            }
+        }
     }
     getChartData() {
         if (this.props.pool) {
@@ -84,6 +94,11 @@ class PoolVote extends Component {
             error: undefined
         });
     }
+    handleShareButton() {
+        let text = encodeURI('What is your opinion?');
+        let url = window.location.href;
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`);
+    }
     renderTooltip({payload}) {
         if(payload[0]) {
             return(
@@ -138,6 +153,9 @@ class PoolVote extends Component {
                                 <Form.Group>
                                     <Form.Button type='submit' onClick={this.handleSubmit.bind(this)} primary>Submit</Form.Button>
                                     <Form.Button type='button' secondary onClick={this.handleOptionButton.bind(this)}>{ !this.state.addOption ? 'Add option' : 'Cancel' }</Form.Button>
+                                    {   this.state.sameUser && 
+                                        <Form.Button color='twitter' icon='twitter' onClick={this.handleShareButton.bind(this)}/>
+                                    }
                                 </Form.Group>
                             </Form>
                             {
@@ -154,17 +172,19 @@ class PoolVote extends Component {
                             }
                         </Grid.Column>
                         <Grid.Column width={8}>
-                                <PieChart width={400} height={400}>
-                                <Pie dataKey='value' data={this.getChartData()}>
-                                    {
-                                        this.getChartData().map((entry, idx) => (
-                                            <Cell key={`cell-${idx}`} fill={chartColors[idx]}/>
-                                        ))
-                                    }
-                                </Pie>
-                                <Legend />
-                                <Tooltip content={this.renderTooltip} />
-                            </PieChart>
+                            <ResponsiveContainer height={400} width='100%'>
+                                <PieChart>
+                                    <Pie dataKey='value' data={this.getChartData()} label>
+                                        {
+                                            this.getChartData().map((entry, idx) => (
+                                                <Cell key={`cell-${idx}`} fill={chartColors[idx]}/>
+                                            ))
+                                        }
+                                    </Pie>
+                                    <Legend />
+                                    <Tooltip content={this.renderTooltip} />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
@@ -185,7 +205,8 @@ function mapStateToProps(state, ownProps) {
     } else {
         return {
             pool: state.pools[ownProps.match.params.id],
-            error: state.pools.error ? "Invalid pool id" : undefined
+            error: state.pools.error ? "Invalid pool id" : undefined,
+            user: state.user
         };
     }
 }
