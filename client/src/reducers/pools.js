@@ -9,7 +9,6 @@ export function poolsReducer(state = {}, action) {
                 total: action.payload.data.total,
                 pools: _.mapKeys(action.payload.data.pools, '_id') 
             };
-            // return { total: action.payload.data.total, pools: action.payload.data.pools };
         case FETCH_POOL:
             if (action.error) {
                 return { error: 'Invalid Pool' } 
