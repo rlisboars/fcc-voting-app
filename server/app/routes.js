@@ -3,8 +3,6 @@ var { Pool, Option } = require('../app/models/pool');
 
 module.exports = function(app, passport) {
 
-    // User access routes
-
     app.post('/api/login', (req, res) => {
         if (!req.body.email || !req.body.password) { 
             res.status(401).json({ error: 'Missing data on request' });
